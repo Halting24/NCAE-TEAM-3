@@ -1,0 +1,233 @@
+                    ================== NCAE TEAM 3  ====================
+
+TEAM = 3
+Internal LAN: 192.168.3.0/24
+Router Internal: 192.168.3.1
+Router External: 172.18.13.3
+Exposed Host: 172.18.14.3
+Web: 192.168.3.5
+DB: 192.168.3.7
+DNS: 192.168.3.12
+Backup: 192.168.3.15
+
+################################################################################
+############################ GLOBAL SITUATIONAL AWARENESS ######################
+################################################################################
+
+hostnamectl
+ip a
+ip route
+ss -tulnp
+ps aux --sort=-%cpu
+ps aux --sort=-%mem
+top
+who
+w
+last
+uptime
+df -h
+free -h
+
+################################################################################
+############################ TEAM ROUTER #######################################
+################################################################################
+
+ip a
+ip route
+sysctl net.ipv4.ip_forward
+cat /proc/sys/net/ipv4/ip_forward
+
+# Enable forwarding if disabled
+sysctl -w net.ipv4.ip_forward=1
+
+# Firewall
+firewall-cmd --state
+firewall-cmd --list-all
+firewall-cmd --add-masquerade --permanent
+firewall-cmd --add-service=ssh --permanent
+firewall-cmd --reload
+
+# Check NAT (if using nftables/iptables)
+iptables -L -n -v
+iptables -t nat -L -n -v
+nft list ruleset
+
+################################################################################
+############################ DNS SERVER (192.168.3.12) ##########################
+################################################################################
+
+systemctl status named
+systemctl restart named
+named-checkconf
+named-checkzone example.local /var/named/example.local.db
+dig @127.0.0.1 example.local
+dig google.com
+cat /etc/named.conf
+ls -lah /var/named
+restorecon -Rv /var/named
+firewall-cmd --add-service=dns --permanent
+firewall-cmd --reload
+ss -tulnp | grep :53
+
+################################################################################
+############################ WEB SERVER (192.168.3.5) ###########################
+################################################################################
+
+systemctl status httpd
+systemctl restart httpd
+systemctl enable httpd
+ss -tulnp | grep :80
+ss -tulnp | grep :443
+
+ls -lah /var/www/html
+restorecon -Rv /var/www/html
+chown -R apache:apache /var/www/html
+chmod -R 755 /var/www/html
+
+journalctl -u httpd
+tail -f /var/log/httpd/access_log
+tail -f /var/log/httpd/error_log
+
+firewall-cmd --add-service=http --permanent
+firewall-cmd --add-service=https --permanent
+firewall-cmd --reload
+
+################################################################################
+############################ DATABASE (192.168.3.7) #############################
+################################################################################
+
+systemctl status mariadb
+systemctl restart mariadb
+systemctl enable mariadb
+mysql_secure_installation
+mysql -u root -p
+ss -tulnp | grep 3306
+
+cat /etc/my.cnf
+grep bind-address /etc/my.cnf
+
+journalctl -u mariadb
+
+################################################################################
+############################ SHELL / SMB (172.18.14.3) ##########################
+################################################################################
+
+# SSH
+systemctl status sshd
+systemctl restart sshd
+cat /etc/ssh/sshd_config
+ss -tulnp | grep :22
+journalctl -u sshd
+grep "Failed password" /var/log/secure
+
+# Lock down SSH
+passwd username
+usermod -L username
+vi /etc/ssh/sshd_config
+systemctl restart sshd
+
+# SMB
+systemctl status smb
+systemctl restart smb
+testparm
+cat /etc/samba/smb.conf
+pdbedit -L
+smbstatus
+ss -tulnp | grep :445
+
+firewall-cmd --add-service=samba --permanent
+firewall-cmd --reload
+
+################################################################################
+############################ BACKUP SERVER (192.168.3.15) #######################
+################################################################################
+
+systemctl status
+df -h
+du -sh /backup
+rsync -av /var/www/html /backup/
+tar -czvf backup.tar.gz /var/www/html
+crontab -l
+cat /etc/crontab
+
+################################################################################
+############################ USER / BACKDOOR CHECK ##############################
+################################################################################
+
+cat /etc/passwd
+cat /etc/shadow
+getent passwd
+awk -F: '$3==0 {print $1}' /etc/passwd
+lastlog
+chage -l username
+usermod -aG wheel username
+usermod -L username
+userdel username
+
+################################################################################
+############################ FILE INTEGRITY ####################################
+################################################################################
+
+find / -perm -4000 -type f 2>/dev/null
+find / -type f -mtime -1
+find / -name "*.sh"
+ls -lah /tmp
+ls -lah /var/tmp
+ls -lah /dev/shm
+rpm -Va
+
+################################################################################
+############################ LOG ANALYSIS ######################################
+################################################################################
+
+journalctl -xe
+journalctl -u sshd
+journalctl -u httpd
+journalctl -u mariadb
+journalctl -u named
+tail -f /var/log/secure
+tail -f /var/log/messages
+
+################################################################################
+############################ NETWORK MONITORING ################################
+################################################################################
+
+tcpdump -i eth0
+tcpdump -i eth1 port 80
+ss -tulnp
+lsof -i
+nmcli device status
+
+################################################################################
+############################ SELINUX ############################################
+################################################################################
+
+getenforce
+sestatus
+restorecon -Rv /var/www
+restorecon -Rv /var/named
+semanage port -l
+
+################################################################################
+############################ PACKAGE CONTROL ####################################
+################################################################################
+
+dnf check-update
+dnf update -y
+dnf list installed
+rpm -qa
+rpm -Va
+
+################################################################################
+############################ QUICK DEFENSE CHECK ################################
+################################################################################
+
+ss -tulnp
+firewall-cmd --list-all
+getenforce
+cat /etc/passwd
+rpm -Va
+journalctl -xe
+df -h
+
+================================================================================
