@@ -1,0 +1,112 @@
+#!/bin/bash
+
+read -p "Team Number: " team
+read -p "Host Name: " name
+read -p "Ip: " ip
+read -p "How many times have you run this: " serial
+
+cp -rp /var/named /root/bind_backup.d
+cp -rp /etc/named.conf /root/named.conf.bak
+
+if [ ! -d /var/named/zones ]; then
+        mkdir /var/named/zones
+fi
+
+cp /var/named/named.empty /var/named/zones/forward.ncaecybergames.org
+cp /var/named/named.empty /var/named/zones/reverse.ncaecybergames.org
+cp /var/named/named.empty /var/named/zones/forward.team.net
+cp /var/named/named.empty /var/named/zones/reverse.team.net
+
+cat << done > /etc/named.conf
+options {
+        directory "/var/named/zones";
+}
+
+zone "team3team.ncaecybergames.org" IN {
+        type master;
+        file "/var/named/zones/forward.ncaecybergames.org";
+};
+
+zone "18.172.in-addr.arpa" IN {
+        type master;
+        file "/var/named/zones/reverse.ncaecybergames.org";
+};
+
+zone "team3team.net" IN {
+        type master;
+        file "/var/named/zones/forward.team.net";
+};
+
+zone "3team.168.192.in-addr.arpa" IN {
+        type master;
+        file "/var/named/zones/reverse.team.net";
+};
+done
+
+cat << done > /var/named/zones/forward.ncaecybergames.org
+\3TTL    86400
+@       IN      SOA     team3team.ncaecybergames.org root (
+                              3serial         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                          86400 )       ; Negative Cache TTL
+;
+@       IN      NS      3name
+3name   IN      A       3ip
+ns1     IN      A       172.18.13.3team
+www     IN      A       172.18.13.3team
+files   IN      A       172.18.14.3team
+shell   IN      A       172.18.14.3team
+done
+
+cat << done > /var/named/zones/reverse.ncaecybergames.org
+\3TTL    86400
+@       IN      SOA     team3team.ncaecybergames.org. root.team3team.ncaecybergames.org. (
+                              3serial         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                          86400 )       ; Negative Cache TTL
+;
+@       IN      NS      3name.
+3team.13        IN      PTR     ns1.team3team.ncaecybergames.org.
+3team.13        IN      PTR     www.team3team.ncaecybergames.org.
+3team.14        IN      PTR     files.team3team.ncaecybergames.org.
+3team.14        IN      PTR     shell.team3team.ncaecybergames.org.
+done
+
+cat << done > /var/named/zones/forward.team.net
+\3TTL    86400
+@       IN      SOA     team3team.net root (
+                              3serial         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                          86400 )       ; Negative Cache TTL
+;
+@       IN      NS      3name
+3name   IN      A       3ip
+ns1     IN      A       192.168.3team.12
+www     IN      A       192.168.3team.5
+db1     IN      A       192.168.3team.7
+done
+
+cat << done > /var/named/zones/reverse.team.net
+\3TTL    86400
+@       IN      SOA     team3team.net. root.team3team.net. (
+                              3serial         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                          86400 )       ; Negative Cache TTL
+;
+@       IN      NS      3name.
+12      IN      PTR     ns1.team3team.net.
+7       IN      PTR     db1.team3team.net.
+5       IN      PTR     www.team3team.net.
+done
+
+chown -R named:named /var/named
+systemctl restart named
+systemctl status named
