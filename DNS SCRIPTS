@@ -22,7 +22,7 @@ options {
         directory "/var/named/zones";
 }
 
-zone "team3team.ncaecybergames.org" IN {
+zone "team23team.ncaecybergames.org" IN {
         type master;
         file "/var/named/zones/forward.ncaecybergames.org";
 };
