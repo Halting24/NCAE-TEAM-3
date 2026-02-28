@@ -32,12 +32,12 @@ zone "18.172.in-addr.arpa" IN {
         file "/var/named/zones/reverse.ncaecybergames.org";
 };
 
-zone "team3team.net" IN {
+zone "team23team.net" IN {
         type master;
         file "/var/named/zones/forward.team.net";
 };
 
-zone "3team.168.192.in-addr.arpa" IN {
+zone "23team.168.192.in-addr.arpa" IN {
         type master;
         file "/var/named/zones/reverse.team.net";
 };
@@ -45,19 +45,19 @@ done
 
 cat << done > /var/named/zones/forward.ncaecybergames.org
 \3TTL    86400
-@       IN      SOA     team3team.ncaecybergames.org root (
-                              3serial         ; Serial
+@       IN      SOA     team23team.ncaecybergames.org root (
+                              23serial         ; Serial
                          604800         ; Refresh
                           86400         ; Retry
                         2419200         ; Expire
                           86400 )       ; Negative Cache TTL
 ;
-@       IN      NS      3name
-3name   IN      A       3ip
-ns1     IN      A       172.18.13.3team
-www     IN      A       172.18.13.3team
-files   IN      A       172.18.14.3team
-shell   IN      A       172.18.14.3team
+@       IN      NS      23name
+23name   IN      A       23ip
+ns1     IN      A       172.18.13.23team
+www     IN      A       172.18.13.23team
+files   IN      A       172.18.14.23team
+shell   IN      A       172.18.14.23team
 done
 
 cat << done > /var/named/zones/reverse.ncaecybergames.org
@@ -70,26 +70,26 @@ cat << done > /var/named/zones/reverse.ncaecybergames.org
                           86400 )       ; Negative Cache TTL
 ;
 @       IN      NS      3name.
-3team.13        IN      PTR     ns1.team3team.ncaecybergames.org.
-3team.13        IN      PTR     www.team3team.ncaecybergames.org.
-3team.14        IN      PTR     files.team3team.ncaecybergames.org.
-3team.14        IN      PTR     shell.team3team.ncaecybergames.org.
+23team.13        IN      PTR     ns1.team23team.ncaecybergames.org.
+23team.13        IN      PTR     www.team23team.ncaecybergames.org.
+23team.14        IN      PTR     files.team23team.ncaecybergames.org.
+23team.14        IN      PTR     shell.team23team.ncaecybergames.org.
 done
 
 cat << done > /var/named/zones/forward.team.net
-\3TTL    86400
-@       IN      SOA     team3team.net root (
+\23TTL    86400
+@       IN      SOA     team23team.net root (
                               3serial         ; Serial
                          604800         ; Refresh
                           86400         ; Retry
                         2419200         ; Expire
                           86400 )       ; Negative Cache TTL
 ;
-@       IN      NS      3name
-3name   IN      A       3ip
-ns1     IN      A       192.168.3team.12
-www     IN      A       192.168.3team.5
-db1     IN      A       192.168.3team.7
+@       IN      NS      23name
+23name   IN      A       3ip
+ns1     IN      A       192.168.23team.12
+www     IN      A       192.168.23team.5
+db1     IN      A       192.168.23team.7
 done
 
 cat << done > /var/named/zones/reverse.team.net
